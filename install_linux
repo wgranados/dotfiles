@@ -1,95 +1,45 @@
 #!/bin/bash
+# Install Git global config and Vim config from this repository (run from repo root
+# or any directory — paths are resolved from this script's location).
 
+set -euo pipefail
 
-setup_git_env(){
-    sudo apt-get install git-core
-    git config --global user.email "me@wgma00.me"
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+setup_git_env() {
+    git config --global user.email "me@wgma.ca"
     git config --global user.name "William Granados"
     git config --global core.editor "vim"
 }
 
-setup_vim_env(){
-    sudo apt-get install vim-gnome
+setup_vim_env() {
     rm -rf ~/.vim
     rm -f ~/.vimrc
-	mv .vim ~ 
-	mv .vimrc ~ 
-	rm -rf ~/.vim/bundle/Vundle.vim
-	git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+    cp -a "${HERE}/.vim" "${HOME}/.vim"
+    cp -a "${HERE}/.vimrc" "${HOME}/.vimrc"
+    mkdir -p "${HOME}/.vim/bundle"
+    rm -rf "${HOME}/.vim/bundle/Vundle.vim"
+    git clone --depth 1 https://github.com/VundleVim/Vundle.vim.git "${HOME}/.vim/bundle/Vundle.vim"
+    rm -rf "${HOME}/.vim/bundle/vim-colors-solarized"
+    git clone --depth 1 https://github.com/altercation/vim-colors-solarized.git "${HOME}/.vim/bundle/vim-colors-solarized"
+    echo "Vim: open vim and run :PluginInstall to fetch remaining plugins (NERDTree, YouCompleteMe, etc.)."
 }
 
-setup_latex_env(){
-    sudo apt-get install $1 
-    sudo apt-get install texstudio
-}
-
-setup_eclipse_env(){
-    # this may change depending on if the server is stil active when this script is running
-    # so if this doesn't work try updating the link yourself 
-    wget http://mirror.cc.vt.edu/pub/eclipse/oomph/epp/neon/R3/eclipse-inst-linux64.tar.gz -O  eclipse-inst-linux64.tar.gz 
-    if [[ -e eclipse-inst-linux64.tar.gz ]]; then
-        # install oracle
-        echo "Installing correct Java dependecies"
-        sudo add-apt-repository ppa:webupd8team/java
-        sudo apt-get update
-        sudo apt-get install oracle-java8-installer
-        sudo apt-get install oracle-java8-set-default
-        tar -xzvf eclipse-inst-linux64.tar.gz  
-        echo "Initiating GUI installer for Eclipse in SUDO mode, make sure to install in /opt as java-neon. Also don't forget to install in advanced setting and to remove the bundler install."
-        sudo ./eclipse-installer/eclipse-inst
-        cp eclipse.desktop ~/.local/share/applications/
-    else
-        echo "Problem downloading Eclipse tar from server, please update link in bash code"
-    fi
-}
-
-
-setup_sublime_env(){
-    wget https://download.sublimetext.com/sublime-text_build-3126_amd64.deb
-    # use ubuntu installer for deb file installed from server, then use
-    # install -f to install any missing depdencies
-    sudo dpkg -i sublime-text_build-3126_amd64.deb && sudo apt-get install -f
-    # move our config to config file for sublime
-    mv sublime/Preferences.sublime-settings /home/william/.config/sublime-text-3/Packages/User
-}
-
-
-
-read -p "Setting up Development Environent. This is a length process, do you wish to continue? y/n `echo $'\n> '`" option
-if [[ "$option" == "y" ]]; then
-
-
-    read -p "Step 1: Setting up Git environment, would you like to skip this step? y/n `echo $'\n> '`" option
-
-    if [[ "$option" == "n" ]]; then
-        setup_git_env
-    fi
-
-    read -p "Step 2: Setting up VIM environment, would you like to skip this step? y/n `echo $'\n> '`" option
-    if [[ "$option" == "n" ]]; then
-        setup_vim_env
-    fi
-
-    read -p "Step 3: Setting up LaTeX environment, would you like to skip this step? y/n `echo $'\n> '`" option
-    if [[ "$option" == "n" ]]; then
-        read -p "Would you like to install the full texlive LaTeX library (3gb) y/n? `echo $'\n> '`" option
-        if [[ "$option" == "y" ]]; then
-            setup_latex_env texlive-full
-        else
-            echo "Setting up basic install of texlive"
-            setup_latex_env texlive
-        fi
-    fi
-
-    read -p "Step 4: Setting up Eclipse environment, would you like to skip this step? y/n `echo $'\n> '`" option
-    if [[ "$option" == "n" ]]; then
-        setup_eclipse_env
-    fi
-
-    read -p "Step 5: Setting up Sublime environment, would you like to skip this step? y/n `echo $'\n> '`" option
-    if [[ "$option" == "n" ]]; then
-        setup_sublime_env
-    fi
-
+read -r -p "Set up Git and Vim from this dotfiles repo? [y/N] " option
+if [[ "${option,,}" != "y" ]]; then
+    exit 0
 fi
 
+read -r -p "Configure Git (user.name, user.email, core.editor)? [Y/n] " option
+if [[ -z "${option}" || "${option,,}" == "y" ]]; then
+    setup_git_env
+    echo "Git global config updated."
+fi
+
+read -r -p "Install Vim config (~/.vim, ~/.vimrc) and clone Vundle + Solarized? [Y/n] " option
+if [[ -z "${option}" || "${option,,}" == "y" ]]; then
+    setup_vim_env
+    echo "Vim layout installed."
+fi
+
+echo "Done."

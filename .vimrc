@@ -1,59 +1,75 @@
 "Vundle plugins--------------------------------------------------------------
 
-
-" set the runtime path to include Vundle and initialize
-set nocompatible              " be iMproved, required AND screw vi
-filetype off                  " required
-" set the runtime path to include Vundle and initialize
+set nocompatible              " be iMproved, required; not vi-compatible
+filetype off                  " required until vundle#end()
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
 " Vim plugins
 Plugin 'VundleVim/vundle.vim'
-Plugin 'Valloric/YouComleteMe'
+Plugin 'Valloric/YouCompleteMe'
 Plugin 'scrooloose/nerdtree'
+Plugin 'altercation/vim-colors-solarized'
 
-"Color Schemes-----------------------------------------------------------------
-syntax on
-" Incase none of the theme plugins are installed
+call vundle#end()
+filetype plugin indent on
+
+" Monokai: add repo .vim to runtimepath and use colorscheme monokai (requires ~/.vimrc symlink into this repo or ~/.vim/colors copy)
+" let s:vimrc_root = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+" let s:repo_vim = s:vimrc_root . '/.vim'
+" if isdirectory(s:repo_vim)
+"   execute 'set rtp+=' . fnameescape(s:repo_vim)
+" endif
+"
+" set background=dark
+" syntax enable
+" try
+"     colorscheme monokai
+" catch
+" endtry
+
+" Solarized (dark / light) — run :PluginInstall if the bundle is missing
+syntax enable
+let g:solarized_termcolors = 256
+let g:solarized_termtrans = 0
+" Default at startup: dark — use set background=light for Solarized light
+set background=dark
 try
-    colorscheme monokai
+    colorscheme solarized
 catch
+    " Run :PluginInstall after adding the Vundle line, or copy colors/solarized.vim into ~/.vim/colors/
 endtry
 
-syntax enable "enable syntax processing
-set background=dark
+" Toggle Solarized dark <-> light (F5)
+nnoremap <silent> <F5> :exe 'set background=' . (&background ==# 'dark' ? 'light' : 'dark')<Bar>colorscheme solarized<CR>
 
 "Indentation-------------------------------------------------------------------
-filetype plugin indent on
-set tabstop=4 "sets number of spaces per TAB character in visual mode
-set softtabstop=4 "sets number of spaces per tab when in insert mode
-set expandtab "sets tab into spaces, essentially makes it into 4 spaces
-set sw=4 "sets the >> command to one tap=4 spaces
+set tabstop=4 " number of spaces per TAB in the file / when displaying tabs
+set softtabstop=4 " spaces per tab in insert mode
+set expandtab " insert spaces instead of tab characters
+set sw=4 " >> and << shift by this many spaces
 
 "UserInterface Configuration --------------------------------------------------
-set relativenumber "shows line number and other cool funky stuff
-set showcmd "shows last command in bottom bar
-set cursorline "highlight current line you are working on
-filetype indent on "loads specific indentaions settings for file types
-set wildmenu "visual autocomplete for commands
-set lazyredraw "increases performances by drawing screen only when needed
-set showmatch "highlight matching [{()}]
+set relativenumber " line numbers relative to cursor
+set showcmd " show partial command in the last line of the screen
+set cursorline " highlight the line with the cursor
+set wildmenu " enhanced command-line completion
+set lazyredraw " redraw only when needed (e.g. during macros)
+set showmatch " briefly jump to matching bracket
 
 
 "Folding-----------------------------------------------------------------------
-set foldenable "enables folding of lines from one to another
-set foldlevelstart=10 "open most folds by default
-set foldnestmax=10 "10 nested folds (i.e. recursion)
-"space open/closes folds
+set foldenable " enable folding
+set foldlevelstart=10 " start with most folds open
+set foldnestmax=10 " max nesting depth for folds
+" space toggles fold under cursor
 nnoremap <space> za
-set foldmethod=indent "fold based on indent level
+set foldmethod=indent " fold on indent
 
 "Movement----------------------------------------------------------------------
-" move vertically regardless of wrapped lines
+" move vertically by screen line when text is wrapped
 nnoremap j gj
 nnoremap k gk
 " move to beginning/end of line
 
 set colorcolumn=80
-

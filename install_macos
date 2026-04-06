@@ -1,4 +1,0 @@
-#!/bin/bash
-
-# stop bootup sound 
-sudo nvram SystemAudioVolume=" "
